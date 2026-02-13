@@ -32,5 +32,5 @@ export default createStore({
     token: state => state.token,
     userId: state => state.userId,
   },
-  modules: [vuexLocal.plugin]
+  plugins: [vuexLocal.plugin]
 })
