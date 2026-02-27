@@ -50,7 +50,7 @@ import { initCustomFormatter } from 'vue';
                 title: this.party.title || null,
                 description: this.aprty.description || null,
                 party_date: this.party.partyDate || null,
-                photos: this.party.photos || null,
+                photos: this.party.photos || [],
                 privacy: this.party.privacy || false,
                 user_id: this.party.userId || null,
                 msg: null,
@@ -61,9 +61,95 @@ import { initCustomFormatter } from 'vue';
         methods: {
             async createParty(e) {
                 e.preventDefault();
+
+                const formData = new FormData();
+
+                formData.append('title', this.title);
+                formData.append('description', this.description);
+                formData.append('privacy', this.privacy);
+                formData.append('party_date', this.party_date);
+
+                if(this.photos.lenght > 0){
+                    for(const i of Object.keys(this.photos)) {
+                        formData.append('photos', this.photos[i]);
+                    }
+                }
+
+                const token = this.$store.getters.token;
+
+                await fetch("http://localhost:3000/api/party", {
+                    method: "POST",
+                    headers: {
+                        "auth-token": token
+                    },
+                    body: formData
+                })
+                .then((resp) => resp.json())
+                .then((data) => {
+                    if(data.error){
+                        this.msg = data.error;
+                        this.msgClass = "error"
+                    } else {
+                        this.msg = data.msg;
+                        this.msgClass = "success"
+                    }
+
+                    setTimeout(() => {
+                        this.msg = null;
+
+                        if(!data.error){
+                            this.$router.push('dashboard');
+                        }
+                    }, 2000)
+
+
+                });
+
             },
             async updateParty(e){
                 e.preventDefault();
+
+                const formData = new FormData();
+
+                formData.append('id', this.id);
+                formData.append('title', this.title);
+                formData.append('description', this.description);
+                formData.append('privacy', this.privacy);
+                formData.append('party_date', this.party_date);
+                formData.append('user_id', this.user_id);
+
+                if(this.photos.lenght > 0){
+                    for(const i of Object.keys(this.photos)) {
+                        formData.append('photos', this.photos[i]);
+                    }
+                }
+
+                const token = this.$store.getters.token;
+
+                await fetch("http://localhost:3000/api/party", {
+                    method: "PATCH",
+                    headers: {
+                        "auth-token": token
+                    },
+                    body: formData
+                })
+                .then((resp) => resp.json())
+                .then((data) => {
+                    if(data.error){
+                        this.msg = data.error;
+                        this.msgClass = "error"
+                    } else {
+                        this.msg = data.msg;
+                        this.msgClass = "success"
+                    }
+
+                    setTimeout(() => {
+                        this.msg = null;
+
+                    }, 2000)
+
+
+                });
             },
             onChange(e) {
                 this.photos = e.target.files;
